@@ -1,14 +1,14 @@
 (function () {
     var app = angular.module('bonuslySorter', []);
     
-    app.controller('IndexCtrl', function($http, $filter, $timeout) {
+    app.controller('IndexCtrl', function($http, $filter) {
         var vm = this;
         var baseUrl = 'https://bonus.ly/api/v1/';
         var userEndpoint = 'users/';
         var userInfo = undefined;
         
-        vm.accessToken = 'b498b87ee3c4511f16947f4d2970e673';
-        vm.userId = '540da6baa454046f8a000001';
+        vm.accessToken = '';
+        vm.userId = '';
         vm.limit = 50;
         vm.displayName = undefined;
         
