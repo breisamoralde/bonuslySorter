@@ -1,16 +1,19 @@
 (function () {
     var app = angular.module('bonuslySorter', []);
     
-    app.controller('IndexCtrl', function($http, $filter) {
+    app.controller('IndexCtrl', function($http, $filter, $timeout) {
         var vm = this;
         var baseUrl = 'https://bonus.ly/api/v1/';
         var userEndpoint = 'users/';
+        var userInfo = undefined;
         
         vm.accessToken = 'b498b87ee3c4511f16947f4d2970e673';
         vm.userId = '540da6baa454046f8a000001';
         vm.limit = 50;
         vm.displayName = undefined;
         
+        vm.loadingResults = false;
+        vm.error = undefined;
         vm.getData = getData;
         
         vm.values = [
@@ -25,18 +28,36 @@
         vm.responses = {};
         
         function getData() {
+            vm.loadingResults = true;
+            clearData();
+            
             getUserInfo().then(function(userData) {
-                var userInfo = userData.data.result;
+                userInfo = userData.data.result;
                 vm.displayName = userInfo.first_name + ' ' + userInfo.last_name;
-                    
-                getBonuses().then(function(response) {
-                    var bonuses = response.data.result;
-                    console.log('reee', response)
-                    angular.forEach(vm.values, function(value) {
-                        vm.responses[value] = $filter('filter')(bonuses, {value : value, receiver: { username: userInfo.username}}, true);
-                    });
-                });  
+
+                getBonuses().then(organizeBonuses, showError).finally(hideSpinner);  
+            }, showError);
+        }
+        
+        function clearData() {
+            vm.error = undefined;
+            vm.responses = {};
+        }
+        
+        function showError(error) {
+            vm.error = error.data.message;
+            vm.loadingResults = false;
+        }
+        
+        function organizeBonuses(response) {
+            var bonuses = response.data.result;
+            angular.forEach(vm.values, function(value) {
+                vm.responses[value] = $filter('filter')(bonuses, {value : value, receiver: { username: userInfo.username}}, true);
             });
+        }
+        
+        function hideSpinner() {
+            vm.loadingResults = false;
         }
         
         function getBonuses() {

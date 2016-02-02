@@ -2,3 +2,32 @@ div.form-center {
     width: 50%;
     margin: 100px auto;
 }
+
+div.center-spinner {
+    margin-top: 100px;
+    text-align: center;
+    color: #D9EDF7;
+}
+
+div.center-spinner > div {
+    margin-top: 10px;
+}
+
+nav.navbar-default {
+    height: 70px;
+    background-color: #d9edf7;
+    border-bottom-color: #bce8f1;
+}
+
+nav.navbar-default > .container-fluid {
+    width: 50%;
+}
+
+nav.navbar-default > .container-fluid > .navbar-header > a.navbar-brand {
+    padding-left: 0px;
+    color: #31708f;
+}
+
+.m-t-50 {
+    margin-top: 50px;
+}
