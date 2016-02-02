@@ -9,8 +9,21 @@
   <script src="index.js"></script>
 </head>
 <body ng-controller="IndexCtrl as index">
+    
+    <div class="form-center">
+        <form ng-submit="index.getData()">
+          <div class="form-group">
+            <label for="accessToken">Access Token</label>
+            <input type="text" class="form-control" id="accessToken" placeholder="Access Token" ng-model="index.accessToken">
+          </div>
+          <div class="form-group">
+            <label for="userId">UserID</label>
+            <input type="text" class="form-control" id="userId" placeholder="UserID" ng-model="index.userId">
+          </div>
 
-  <p>{{ index.test }}</p>
+          <button type="submit" class="btn btn-default">GET</button>
+        </form>
+    </div>
 
 </body>
 </html>
