@@ -30,6 +30,37 @@
 
           <button type="submit" class="btn btn-default">GET</button>
         </form>
+    
+        <hr/>
+        <h3 class="" ng-show="index.displayName">Bonuses received by: {{ index.displayName }}</h3>
+    
+        <div class="table-responsive" ng-repeat="(key, bonuses) in index.responses">
+            <h3>{{ key }}</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Giver
+                        </th>
+                        <th>
+                            Comment
+                        </th>
+                    </tr>
+                </thead>
+                <tbody ng-if="bonuses.length === 0">
+                    <tr>
+                        <td colspan="2">Sorry, looks like you didn't recieve anything for this category.</td>
+                    </tr>
+                </tbody>
+                <tbody ng-repeat="value in bonuses">
+                    <tr>
+                        <td>{{ value.giver.display_name }}</td>
+                        <td>{{ value.reason }}</td>
+                    </tr>
+                </tbody>
+            </table>  
+        </div>
     </div>
+
 </body>
 </html>
