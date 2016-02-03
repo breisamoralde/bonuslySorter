@@ -80,11 +80,13 @@
                        required="required">
             </div>
 
-            <button type="submit" class="btn btn-primary" ng-disabled="index.loadingResults">
-                <span>Recognize&nbsp;</span>
-                <span><strong ng-bind="index.getButtonText()"></strong>&nbsp;</span>
-                <span>awesomeness!!</span>
-            </button>
+            <div class="text-center m-t-50">
+                <button type="submit" class="btn btn-primary" ng-disabled="index.loadingResults">
+                    <span>Find&nbsp;</span>
+                    <span><strong ng-bind="index.getButtonText()"></strong>&nbsp;</span>
+                    <span>awesomeness!!</span>
+                </button>
+            </div>
         </form>
 
         <div ng-show="index.loadingResults" class="m-t-50">
