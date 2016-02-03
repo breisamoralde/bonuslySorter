@@ -84,7 +84,7 @@
 
         <div class="table-responsive" ng-repeat="(key, bonuses) in index.responses">
 
-            <table class="table">
+            <table class="table table-of-awesomeness">
                 <thead>
                 <tr>
                     <th>
@@ -100,7 +100,7 @@
                 <tbody ng-repeat="value in bonuses">
                 <tr>
 
-                    <td>{{ value.reason }} from: <b>{{ value.giver.display_name }}</b></td>
+                    <td>{{ value.reason }} from <b>{{ value.giver.display_name }}</b> <em>{{ value.created_at | date: 'shortDate' }}</em></td>
                 </tr>
                 </tbody>
             </table>
