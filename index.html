@@ -23,7 +23,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <div class="recognition-top-block">
-                <span ng-show="index.shouldDisplayTopReceiverText()" class="recognition-top-by"> &#45; Recognitions received by {{ index.displayName }}</span>
+                <span ng-show="index.shouldDisplayTopReceiverText()" class="recognition-top-by" ng-bind="' - ' + index.getDisplayNameTemplate()"></span>
             </div>
             <ul class="nav navbar-nav navbar-right">
             </ul>
@@ -88,7 +88,7 @@
 
         <div ng-show="!index.loadingResults" class="m-t-50" id="recognitions">
             <hr/>
-            <h2 id="receiver-block" class="" ng-show="index.displayName">Recognitions received by: {{ index.displayName }}</h2>
+            <h2 id="receiver-block" ng-show="index.getDisplayNameTemplate()" ng-bind="index.getDisplayNameTemplate()"></h2>
 
             <div class="table-responsive" ng-repeat="(key, bonuses) in index.responses">
 

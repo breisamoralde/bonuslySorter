@@ -9,6 +9,7 @@
         vm.hasAPIKey = _hasAPIKey;
         vm.shouldDisplayTopReceiverText = _shouldDisplayTopReceiverText;
         vm.backToTop = _backToTop;
+        vm.getDisplayNameTemplate = _getDisplayNameTemplate;
 
         vm.accessToken = undefined;
         vm.accessToken = 'b61bb1e8a586ca461aef33a60d5cc4a8';
@@ -26,14 +27,6 @@
 
         var receiverBlock = jQuery('h2#receiver-block');
 
-        jQuery(window).scroll(function() {
-            var receiverBlockTop = receiverBlock.offset().top - receiverBlock.outerHeight();
-            var bodyScrollTopPosition = jQuery('body').scrollTop();
-            $timeout(function() { vm.isTopOverlaying = bodyScrollTopPosition > receiverBlockTop; });
-        });
-
-        $anchorScroll.yOffset = jQuery('nav.navbar-fixed-top').outerHeight();
-
         var _BASE_BONUSLY_API_URL = 'https://bonus.ly/api/v1/',
             _USERS_ENDPOINT = 'users/',
             _BONUSLY_VALUES = [
@@ -44,6 +37,22 @@
                 'speed',
                 'frugality'
             ];
+
+        _init();
+
+        /////////////////////////////////////////////////////////////
+
+
+        function _init() {
+            jQuery(window).scroll(function() {
+                var receiverBlockTop = receiverBlock.offset().top - receiverBlock.outerHeight();
+                var bodyScrollTopPosition = jQuery('body').scrollTop();
+                $timeout(function() { vm.isTopOverlaying = bodyScrollTopPosition > receiverBlockTop; });
+            });
+
+            $anchorScroll.yOffset = jQuery('nav.navbar-fixed-top').outerHeight();
+            $location.hash('');
+        }
         
         function getData() {
             vm.loadingResults = true;
@@ -77,8 +86,9 @@
 
                 var receiverInfo = _isReceiverEmailAddressDefined() ? resultData[0] : resultData;
                 var receiverEmailAddress = receiverInfo.email;
+                var wholeName = _constructWholeName(receiverInfo);
 
-                vm.displayName = receiverInfo.first_name + ' ' + receiverInfo.last_name;
+                vm.displayName = wholeName;
 
                 _getBonuses()
                     .then(_organizeBonuses, _showError)
@@ -102,6 +112,20 @@
                     vm.error = emailAddressInvalidErrorMessage;
                     vm.loadingResults = false;
                     throw new Error(emailAddressInvalidErrorMessage);
+                }
+
+                function _constructWholeName(receiverInfo) {
+                    var wholeName = '';
+
+                    if (receiverInfo.first_name) {
+                        wholeName += receiverInfo.first_name
+                    }
+
+                    if (receiverInfo.last_name) {
+                        wholeName += (wholeName.length > 0 ? ' ' : '') + receiverInfo.last_name;
+                    }
+
+                    return wholeName.length > 0 ? wholeName : 'someone';
                 }
 
                 function _getBonuses() {
@@ -174,7 +198,7 @@
         }
 
         function _shouldDisplayTopReceiverText() {
-            return vm.isTopOverlaying && JSON.stringify(vm.responses) !== '{}';
+            return vm.isTopOverlaying && JSON.stringify(vm.responses) !== '{}' && vm.displayName;
         }
 
         function _backToTop() {
@@ -184,6 +208,12 @@
 
         function _isReceiverEmailAddressDefined() {
             return angular.isDefined(vm.userId) && vm.userId.length
+        }
+
+        function _getDisplayNameTemplate() {
+            if (angular.isUndefined(vm.displayName) || vm.displayName.length === 0) { return undefined; }
+
+            return _isReceiverEmailAddressDefined() ? vm.displayName + '`s recognitions' : 'Your awesome recognitions' ;
         }
     });
 })();
