@@ -12,7 +12,6 @@
         vm.getDisplayNameTemplate = _getDisplayNameTemplate;
 
         vm.accessToken = undefined;
-        vm.accessToken = 'b61bb1e8a586ca461aef33a60d5cc4a8';
         vm.userId = undefined;
         vm.limit = 50;
         vm.displayName = undefined;
@@ -52,6 +51,11 @@
 
             $anchorScroll.yOffset = jQuery('nav.navbar-fixed-top').outerHeight();
             $location.hash('');
+
+            var preDefinedToken = $location.search().token;
+            if (preDefinedToken && preDefinedToken.length > 0) {
+                vm.accessToken = preDefinedToken;
+            }
         }
         
         function getData() {
@@ -215,5 +219,12 @@
 
             return _isReceiverEmailAddressDefined() ? vm.displayName + '`s recognitions' : 'Your awesome recognitions' ;
         }
+    });
+
+    app.config(function($locationProvider) {
+        $locationProvider.html5Mode({
+            enabled: true,
+            requireBase: false
+        });
     });
 })();
