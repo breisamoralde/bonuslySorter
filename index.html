@@ -13,99 +13,108 @@
     <script src="index.js"></script>
 </head>
 <body ng-controller="IndexCtrl as index">
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="#" ng-click="index.backToTop()">
                 <i class="fa fa-gift fa-2x"></i>
                 #Bonus.ly
             </a>
         </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <div class="recognition-top-block">
+                <span ng-show="index.shouldDisplayTopReceiverText()" class="recognition-top-by"> &#45; Recognitions received by {{ index.displayName }}</span>
+            </div>
+            <ul class="nav navbar-nav navbar-right">
+            </ul>
+        </div>
     </div>
 </nav>
-<div class="form-center">
-    <div class="alert alert-info alert-dismissible" role="alert" ng-hide="index.hasAPIKey()">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
-        Generate your API key <a target="_blank" href="https://bonus.ly/api">here</a>!
-    </div>
-    <div class="alert alert-danger alert-dismissible" role="alert" ng-show="index.error">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
-                aria-hidden="true">&times;</span></button>
-        <strong>Oh Snap!</strong> An Error occurred: {{ index.error }}.
-    </div>
-
-    <form ng-submit="index.getData()">
-        <div class="form-group required">
-            <label for="accessToken" class="control-label">Your API Access Token</label>
-            <input type="text" class="form-control" id="accessToken" placeholder="Access Token"
-                   ng-model="index.accessToken" required="required">
+<div class="container">
+    <div class="form-center">
+        <div class="alert alert-info alert-dismissible" role="alert" ng-hide="index.hasAPIKey()">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span></button>
+            Generate your API key <a target="_blank" href="https://bonus.ly/api">here</a>!
         </div>
-        <div class="form-group">
-            <label for="userId">Receiver's Email Address</label>
-            <input type="text"
-                   class="form-control"
-                   id="userId"
-                   placeholder="Receiver's Email Address"
-                   ng-model="index.userId" list="emailAddresses"/>
-            <datalist id="emailAddresses">
-                <option value="somerandomdude@thiscompany.org">
-                <option value="buul sha-ith">
-            </datalist>
-        </div>
-        <div class="form-group">
-            <label for="limit">Limit</label>
-            <input type="number" min="1" class="form-control" id="limit" placeholder="Limit" ng-model="index.limit"
-                   required="required">
+        <div class="alert alert-danger alert-dismissible" role="alert" ng-show="index.error">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                    aria-hidden="true">&times;</span></button>
+            <strong>Oh Snap!</strong> An Error occurred: {{ index.error }}.
         </div>
 
-        <button type="submit" class="btn btn-primary">
-            <span>Recognize&nbsp;</span>
-            <span><strong ng-bind="index.getButtonText()"></strong>&nbsp;</span>
-            <span>awesomeness!!</span>
-        </button>
-    </form>
+        <form ng-submit="index.getData()">
+            <div class="form-group required">
+                <label for="accessToken" class="control-label">Your API Access Token</label>
+                <input type="text" class="form-control" id="accessToken" placeholder="Access Token"
+                       ng-model="index.accessToken" required="required">
+            </div>
+            <div class="form-group">
+                <label for="userId">Receiver's Email Address</label>
+                <input type="text"
+                       class="form-control"
+                       id="userId"
+                       placeholder="Receiver's Email Address"
+                       ng-model="index.userId" list="emailAddresses"/>
+                <datalist id="emailAddresses">
+                    <option value="somerandomdude@thiscompany.org">
+                    <option value="buul sha-ith">
+                </datalist>
+            </div>
+            <div class="form-group">
+                <label for="limit">Limit</label>
+                <input type="number" min="1" class="form-control" id="limit" placeholder="Limit" ng-model="index.limit"
+                       required="required">
+            </div>
 
-    <div ng-show="index.loadingResults" class="m-t-50">
-        <hr/>
+            <button type="submit" class="btn btn-primary" ng-disabled="index.loadingResults">
+                <span>Recognize&nbsp;</span>
+                <span><strong ng-bind="index.getButtonText()"></strong>&nbsp;</span>
+                <span>awesomeness!!</span>
+            </button>
+        </form>
 
-        <div class="center-spinner">
-            <i class="fa fa-thumbs-o-up fa-spin fa-5x"></i>
+        <div ng-show="index.loadingResults" class="m-t-50">
+            <hr/>
 
-            <div>
-                loading your awesomeness
+            <div class="center-spinner">
+                <i class="fa fa-thumbs-o-up fa-spin fa-5x"></i>
+
+                <div>
+                    loading {{ index.getButtonText() }} awesomeness
+                </div>
             </div>
         </div>
-    </div>
 
-    <div ng-show="!index.loadingResults" class="m-t-50">
-        <hr/>
-        <h2 class="" ng-show="index.displayName">Bonuses received by: {{ index.displayName }}</h2>
+        <div ng-show="!index.loadingResults" class="m-t-50" id="recognitions">
+            <hr/>
+            <h2 id="receiver-block" class="" ng-show="index.displayName">Recognitions received by: {{ index.displayName }}</h2>
 
-        <div class="table-responsive" ng-repeat="(key, bonuses) in index.responses">
+            <div class="table-responsive" ng-repeat="(key, bonuses) in index.responses">
 
-            <table class="table table-of-awesomeness">
-                <thead>
-                <tr>
-                    <th>
-                        <h3>#{{ key }}</h3>
-                    </th>
-                </tr>
-                </thead>
-                <tbody ng-if="bonuses.length === 0">
-                <tr>
-                    <td colspan="1">Sorry, looks like you didn't recieve anything for this category.</td>
-                </tr>
-                </tbody>
-                <tbody ng-repeat="value in bonuses">
-                <tr>
+                <table class="table table-of-awesomeness" id="{{ key }}">
+                    <thead>
+                    <tr>
+                        <th>
+                            <h3>#{{ key }}</h3>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody ng-if="bonuses.length === 0">
+                    <tr>
+                        <td colspan="1">Sorry, looks like you didn't recieve anything for this category.</td>
+                    </tr>
+                    </tbody>
+                    <tbody ng-repeat="value in bonuses">
+                    <tr>
 
-                    <td>{{ value.reason }} from <b>{{ value.giver.display_name }}</b> <em>{{ value.created_at | date: 'shortDate' }}</em></td>
-                </tr>
-                </tbody>
-            </table>
+                        <td>{{ value.reason }} from <b>{{ value.giver.display_name }}</b> <em>{{ value.created_at | date: 'shortDate' }}</em></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
-
     </div>
 </div>
 

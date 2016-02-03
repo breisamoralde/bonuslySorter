@@ -1,3 +1,7 @@
+body {
+    padding-top: 70px;
+}
+
 div.form-center {
     width: 50%;
     margin: 100px auto;
@@ -42,10 +46,20 @@ table.table-of-awesomeness > tbody > tr > td > em {
 
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s, opacity 0.5s linear;
+    transition: visibility 0s, opacity 0.2s linear;
 }
 
 table.table-of-awesomeness > tbody > tr:hover > td > em {
     visibility: visible;
     opacity: 1;
+}
+
+div.recognition-top-block {
+    height: auto;
+    line-height: 50px;
+    padding-top: 14px;
+}
+
+span.recognition-top-by {
+    color: #31708F;
 }

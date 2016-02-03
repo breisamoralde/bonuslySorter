@@ -1,14 +1,17 @@
 (function () {
     var app = angular.module('bonuslySorter', []);
     
-    app.controller('IndexCtrl', function($http, $filter) {
+    app.controller('IndexCtrl', function($http, $filter, $timeout, $location, $anchorScroll) {
         var vm = this;
 
         vm.getData = getData;
         vm.getButtonText = _getButtonText;
         vm.hasAPIKey = _hasAPIKey;
+        vm.shouldDisplayTopReceiverText = _shouldDisplayTopReceiverText;
+        vm.backToTop = _backToTop;
 
         vm.accessToken = undefined;
+        vm.accessToken = 'b61bb1e8a586ca461aef33a60d5cc4a8';
         vm.userId = undefined;
         vm.limit = 50;
         vm.displayName = undefined;
@@ -17,7 +20,19 @@
         vm.responses = {};
         vm.error = undefined;
 
+        vm.isTopOverlaying = false;
+
         var apiAccessTokenStatus = undefined;
+
+        var receiverBlock = jQuery('h2#receiver-block');
+
+        jQuery(window).scroll(function() {
+            var receiverBlockTop = receiverBlock.offset().top - receiverBlock.outerHeight();
+            var bodyScrollTopPosition = jQuery('body').scrollTop();
+            $timeout(function() { vm.isTopOverlaying = bodyScrollTopPosition > receiverBlockTop; });
+        });
+
+        $anchorScroll.yOffset = jQuery('nav.navbar-fixed-top').outerHeight();
 
         var _BASE_BONUSLY_API_URL = 'https://bonus.ly/api/v1/',
             _USERS_ENDPOINT = 'users/',
@@ -112,6 +127,8 @@
                             true
                         );
                     });
+                    $location.hash('recognitions');
+                    $anchorScroll();
                 }
 
                 function _hideSpinner() {
@@ -123,6 +140,7 @@
                 vm.displayName = undefined;
                 vm.error = undefined;
                 vm.responses = {};
+                $location.hash('');
             }
 
             function _showError(error) {
@@ -153,6 +171,15 @@
 
         function _hasAPIKey() {
             return apiAccessTokenStatus !== 401 && angular.isDefined(vm.accessToken) && vm.accessToken.length;
+        }
+
+        function _shouldDisplayTopReceiverText() {
+            return vm.isTopOverlaying && JSON.stringify(vm.responses) !== '{}';
+        }
+
+        function _backToTop() {
+            $location.hash('');
+            $anchorScroll();
         }
 
         function _isReceiverEmailAddressDefined() {
