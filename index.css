@@ -31,3 +31,8 @@ nav.navbar-default > .container-fluid > .navbar-header > a.navbar-brand {
 .m-t-50 {
     margin-top: 50px;
 }
+
+.form-group.required .control-label:after {
+     content: "*";
+     color: red;
+}

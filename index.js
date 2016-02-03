@@ -3,88 +3,160 @@
     
     app.controller('IndexCtrl', function($http, $filter) {
         var vm = this;
-        var baseUrl = 'https://bonus.ly/api/v1/';
-        var userEndpoint = 'users/';
-        var userInfo = undefined;
-        
-        vm.accessToken = '';
-        vm.userId = '';
+
+        vm.getData = getData;
+        vm.getButtonText = _getButtonText;
+        vm.hasAPIKey = _hasAPIKey;
+
+        vm.accessToken = undefined;
+        vm.userId = undefined;
         vm.limit = 50;
         vm.displayName = undefined;
-        
+
         vm.loadingResults = false;
-        vm.error = undefined;
-        vm.getData = getData;
-        
-        vm.values = [
-            'proactivity',
-            'proficiency',
-            'leadership',
-            'bias-for-action',
-            'speed',
-            'frugality'
-        ];
-        
         vm.responses = {};
+        vm.error = undefined;
+
+        var apiAccessTokenStatus = undefined;
+
+        var _BASE_BONUSLY_API_URL = 'https://bonus.ly/api/v1/',
+            _USERS_ENDPOINT = 'users/',
+            _BONUSLY_VALUES = [
+                'proactivity',
+                'proficiency',
+                'leadership',
+                'bias-for-action',
+                'speed',
+                'frugality'
+            ];
         
         function getData() {
             vm.loadingResults = true;
-            clearData();
-            
-            getUserInfo().then(function(userData) {
-                userInfo = userData.data.result;
-                vm.displayName = userInfo.first_name + ' ' + userInfo.last_name;
 
-                getBonuses().then(organizeBonuses, showError).finally(hideSpinner);  
-            }, showError);
-        }
-        
-        function clearData() {
-            vm.error = undefined;
-            vm.responses = {};
-        }
-        
-        function showError(error) {
-            vm.error = error.data.message;
-            vm.loadingResults = false;
-        }
-        
-        function organizeBonuses(response) {
-            var bonuses = response.data.result;
-            angular.forEach(vm.values, function(value) {
-                vm.responses[value] = $filter('filter')(bonuses, {value : value, receiver: { username: userInfo.username}}, true);
-            });
-        }
-        
-        function hideSpinner() {
-            vm.loadingResults = false;
-        }
-        
-        function getBonuses() {
-            var usersEndpoint = userEndpoint + vm.userId + '/bonuses?limit=' + vm.limit + '&skip=0&access_token=' + vm.accessToken; 
-            var fullUrl = baseUrl + usersEndpoint;
-            var request = formGETRequest();
+            _clearData();
             
-            return $http.get(fullUrl, request);
-        }
-         
-        function getUserInfo() {
-            var meEndpoint = baseUrl + userEndpoint + 'me' + '?access_token=' + vm.accessToken;
-            var request = formGETRequest();
-            
-            return $http.get(meEndpoint, request);
-        }
-        
-        function formGETRequest() {
-            var request = {};
-            request.method = 'GET';
-            request.headers = {
-                'Content-Type': 'application/json; charset=utf-8'
+            _getReceiverInfo()
+                .then(_onGetUserInfoSuccess, _showError);
+
+
+            function _getReceiverInfo() {
+                var receiverEndpoint = _BASE_BONUSLY_API_URL + _USERS_ENDPOINT + _resolveReceiver() +
+                    'access_token=' + vm.accessToken;
+                var request = _formGETRequest();
+
+                return $http.get(receiverEndpoint, request);
+
+
+                function _resolveReceiver() {
+                    return _isReceiverEmailAddressDefined() ?
+                        '?email=' + vm.userId + '&' :
+                        'me?';
+                }
             }
-            
-            return request;
+
+            function _onGetUserInfoSuccess(receiverData) {
+                apiAccessTokenStatus = 200;
+                var resultData = receiverData.data.result;
+
+                _validateResults();
+
+                var receiverInfo = _isReceiverEmailAddressDefined() ? resultData[0] : resultData;
+                var receiverEmailAddress = receiverInfo.email;
+
+                vm.displayName = receiverInfo.first_name + ' ' + receiverInfo.last_name;
+
+                _getBonuses()
+                    .then(_organizeBonuses, _showError)
+                    .finally(_hideSpinner);
+
+
+                function _validateResults() {
+                    var emailAddressInvalidErrorMessage = undefined;
+
+                    if (!_isReceiverEmailAddressDefined() || resultData.length === 1) {
+                        return;
+                    }
+                    else if (resultData.length === 0) {
+                        emailAddressInvalidErrorMessage = 'Who is \'' + vm.userId + '\'?';
+                    }
+                    else if (resultData.length > 1) {
+                        emailAddressInvalidErrorMessage = 'Email Address \'' + vm.userId + '\'' +
+                            ' has many identities!'
+                    }
+
+                    vm.error = emailAddressInvalidErrorMessage;
+                    vm.loadingResults = false;
+                    throw new Error(emailAddressInvalidErrorMessage);
+                }
+
+                function _getBonuses() {
+                    var usersEndpoint = 'bonuses?receiver_email=' + receiverEmailAddress + '&limit=' +
+                        vm.limit + '&skip=0&access_token=' + vm.accessToken;
+                    var fullUrl = _BASE_BONUSLY_API_URL + usersEndpoint;
+                    var request = _formGETRequest();
+
+                    return $http.get(fullUrl, request);
+                }
+
+                function _organizeBonuses(response) {
+                    var bonuses = response.data.result;
+                    angular.forEach(_BONUSLY_VALUES, function(value) {
+                        vm.responses[value] = $filter('filter')(
+                            bonuses,
+                            {
+                                value : value,
+                                receiver: {
+                                    username: receiverInfo.username
+                                }
+                            },
+                            true
+                        );
+                    });
+                }
+
+                function _hideSpinner() {
+                    vm.loadingResults = false;
+                }
+            }
+
+            function _clearData() {
+                vm.displayName = undefined;
+                vm.error = undefined;
+                vm.responses = {};
+            }
+
+            function _showError(error) {
+                vm.error = error.data.message;
+                apiAccessTokenStatus = error.status;
+                vm.loadingResults = false;
+            }
+
+            function _formGETRequest() {
+                var request = {};
+                request.method = 'GET';
+                request.headers = {
+                    'Content-Type': 'application/json; charset=utf-8'
+                };
+
+                return request;
+            }
         }
-        
+
+        function _getButtonText() {
+            return _isReceiverEmailAddressDefined() ? _resolveEmailAddressLocalPart() + '`s' : 'your';
+
+
+            function _resolveEmailAddressLocalPart() {
+                return vm.userId.split('@')[0];
+            }
+        }
+
+        function _hasAPIKey() {
+            return apiAccessTokenStatus !== 401 && angular.isDefined(vm.accessToken) && vm.accessToken.length;
+        }
+
+        function _isReceiverEmailAddressDefined() {
+            return angular.isDefined(vm.userId) && vm.userId.length
+        }
     });
-    
 })();
