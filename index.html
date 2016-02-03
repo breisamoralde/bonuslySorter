@@ -108,7 +108,7 @@
                     <tbody ng-repeat="value in bonuses">
                     <tr>
 
-                        <td>{{ value.reason }} from <b>{{ value.giver.display_name }}</b> <em>{{ value.created_at | date: 'shortDate' }}</em></td>
+                        <td>{{ value.reason }} from <b title="{{ value.giver.email }}">{{ value.giver.display_name }}</b> <em title="{{ value.created_at | date: 'medium' }}">{{ value.created_at | date: 'shortDate' }}</em></td>
                     </tr>
                     </tbody>
                 </table>
